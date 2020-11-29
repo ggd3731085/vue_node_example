@@ -1,0 +1,145 @@
+<script src="vue.min.js"></script>
+<script src="jquery.min.js"></script>
+
+<style>
+    table tr td {
+        border: 1px solid gray;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 300px;
+    }
+
+    tr.firstLine {
+        background-color: lightGray;
+    }
+</style>
+
+<div id="div1">
+
+    <table align="center" id="studentListTable" >
+        <tr class="firstLine">
+            <td>name</td>
+            <td>score</td>
+            <td>operation</td>
+        </tr>
+
+        <tr v-for="student in students">
+            <td><input v-model="student.name" placeholder="name" :disabled="!student.update"></td>
+            <td><input v-model="student.score" placeholder="score" :disabled="!student.update"></td>
+            
+            <td>
+                <button type="button" @click="del(student.id)">删除</button>
+                <button type="button" @click="edit(student)">编辑</button>
+                <button type="button" @click="cancle(student)">取消</button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="3">
+                学生名称:
+                <input type="text" v-model="addStudent.name" />
+                <br>
+                成绩：
+                <input type="number" v-model="addStudent.score" />
+                <br>
+                <button type="button" v-on:click="add">增加</button>
+            </td>
+        </tr>
+    </table>
+
+    <div align="center" id="updateDiv">
+              
+        学生名称:
+        <input type="text"    v-model="updateStudent.name" />
+        <br>
+        成绩：
+        <input type="number"    v-model="updateStudent.score" />                       
+        <input type="hidden"    v-model="updateStudent.id" />                       
+        <br>
+        <button type="button"  v-on:click="update">确定</button>                
+        <br>
+        <button type="button"  v-on:click="cancle">取消</button> 
+</div>
+
+</div>
+
+<script>
+    //修改区域隐藏起来先
+    $("#updateDiv").hide();
+    var data = {
+        students:    [
+        { id: 1, name: '张三', score: 94 ,update: false},
+        { id: 2, name: '李四', score: 85 ,update: false},
+        { id: 3, name: '王五', score: 67 ,update: false},
+        { id: 4, name: '赵六', score: 53 ,update: false}
+    ],
+    addStudent: { id: 0, name: '', score: 60 },
+    oldStudent: { id: 0, name: '', score: 0 },
+    updateStudent: { id: 0, name: '', score: 0 }
+    };
+        //用于记录最大id值
+        var maxId = 5;
+    //计算最大值
+    for (var i=0;i<data.students.length;i++){
+        if (data.students[i].id > maxId)
+            maxId=  this.students[i].id;
+    }   
+    new Vue({
+        el: '#div1',
+        data:  data,
+        methods: {
+            add: function (event) {
+                //获取最大id
+                maxId++;
+                //赋予新id
+                this.addStudent.id = maxId;
+                if(this.addStudent.name.length==0) {
+                    this.addStudent.name = "Student#"+this.addStudent.id;
+                }
+                //把对象加入到数组
+                this.students.push(this.addStudent);
+                //让 addStudent 指向新的对象
+                this.addStudent = { id: 0, name: '', score: 60}
+            },
+            del: function (id) {
+                for (var i=0;i<this.students.length;i++){
+                    if (this.students[i].id == id) {
+                        this.students.splice(i, 1);
+                        break;
+                    }
+                }
+            },
+            edit: function (studentold) {
+                //this.updateStudent = studentold;
+                this.oldStudent.id = studentold.id;
+                this.oldStudent.name = studentold.name;
+                this.oldStudent.score = studentold.score;
+                // $("#studentListTable").hide();
+                // $("#updateDiv").show();
+                studentold.update = !studentold.update;
+                // this.updateStudent = student;
+            },
+            update:function(student){
+                //因为v-model，已经同步修改了，所以只需要进行恢复显示就行了
+                $("#studentListTable").show();
+                $("#updateDiv").hide();          
+                this.updateStudent = studentold;
+                this.oldStudent.id = studentold.id;
+                this.oldStudent.name = studentold.name;
+                this.oldStudent.score = studentold.score;
+            },
+            cancle:function(student){
+                for (var i=0;i<this.students.length;i++){
+                    if (this.students[i].id == student.id) {
+                        this.students[i].id = this.oldStudent.id;
+                        this.students[i].name = this.oldStudent.name;
+                        this.students[i].score = this.oldStudent.score;
+                        break;
+                    }
+                }
+            }
+        }       
+    })
+
+</script>
